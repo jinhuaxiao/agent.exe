@@ -18,6 +18,7 @@ import { Route, MemoryRouter as Router, Routes } from 'react-router-dom';
 import { useDispatch } from 'zutron';
 import { useStore } from './hooks/useStore';
 import { RunHistory } from './RunHistory';
+import './styles/globals.css';
 
 function Main() {
   const dispatch = useDispatch(window.zutron);
@@ -28,14 +29,12 @@ function Main() {
     error,
     runHistory,
   } = useStore();
-  // Add local state for instructions
   const [localInstructions, setLocalInstructions] = React.useState(
     savedInstructions ?? '',
   );
-  const toast = useToast(); // Add toast hook
+  const toast = useToast();
 
   const startRun = () => {
-    // Update Zustand state before starting the run
     dispatch({ type: 'SET_INSTRUCTIONS', payload: localInstructions });
     dispatch({ type: 'RUN_AGENT', payload: null });
   };
@@ -54,17 +53,15 @@ function Main() {
       h="100vh"
       p={4}
       sx={{
-        '-webkit-app-region': 'drag', // Make the background draggable
+        '-webkit-app-region': 'drag',
       }}
     >
-      {/* Title heading no longer needs drag property since parent is draggable */}
       <Box position="absolute" top={2} left={6}>
         <Heading fontFamily="Garamond, serif" fontWeight="hairline">
           Agent.exe
         </Heading>
       </Box>
 
-      {/* Window controls and GitHub button moved together */}
       <HStack
         position="absolute"
         top={2}
@@ -107,7 +104,6 @@ function Main() {
         pt={16}
         sx={{
           '& > *': {
-            // Make all direct children non-draggable
             '-webkit-app-region': 'no-drag',
           },
         }}
@@ -141,7 +137,6 @@ function Main() {
           disabled={running}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
             setLocalInstructions(e.target.value);
-            // Auto-adjust height
             e.target.style.height = 'auto';
             e.target.style.height = `${e.target.scrollHeight}px`;
           }}
@@ -210,14 +205,12 @@ function Main() {
           </HStack>
         </HStack>
 
-        {/* Add error display */}
         {error && (
           <Box w="100%" color="red.700">
             {error}
           </Box>
         )}
 
-        {/* RunHistory component */}
         <Box flex="1" w="100%" overflow="auto">
           <RunHistory />
         </Box>

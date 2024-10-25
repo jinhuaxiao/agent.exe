@@ -1,4 +1,4 @@
-import { BetaMessageParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
+import { BetaMessageParam, BetaContentBlockParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
 import { NextAction } from './types';
 
 export const extractAction = (
@@ -8,12 +8,18 @@ export const extractAction = (
   reasoning: string;
   toolId: string;
 } => {
-  const reasoning = message.content
-    .filter((content) => content.type === 'text')
-    .map((content) => content.text)
-    .join(' ');
+  const reasoning = Array.isArray(message.content) 
+    ? message.content
+        .filter((content): content is BetaContentBlockParam & { type: 'text' } => 
+          content.type === 'text')
+        .map((content) => content.text)
+        .join(' ')
+    : message.content;
 
-  const lastMessage = message.content[message.content.length - 1];
+  const lastMessage = Array.isArray(message.content) 
+    ? message.content[message.content.length - 1]
+    : message.content;
+
   if (typeof lastMessage === 'string') {
     return {
       action: { type: 'error', message: 'No tool called' },
@@ -29,6 +35,7 @@ export const extractAction = (
       toolId: '',
     };
   }
+
   if (lastMessage.name === 'finish_run') {
     const input = lastMessage.input as {
       success: boolean;
@@ -50,6 +57,7 @@ export const extractAction = (
       toolId: lastMessage.id,
     };
   }
+
   if (lastMessage.name !== 'computer') {
     return {
       action: {
